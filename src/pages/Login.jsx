@@ -54,7 +54,7 @@ const Login = ({ updateStatus }) => {
 
       if (response.ok) {
         updateStatus(data.accessToken); // Gọi updateStatus với accessToken
-        navigate("/dashboard"); // Chuyển đến trang dashboard
+        navigate("/"); // Chuyển đến trang dashboard
       } else {
         setError(data.message || "Login failed. Please try again.");
       }

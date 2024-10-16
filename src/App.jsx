@@ -24,7 +24,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login updateStatus={updateStatus} />} />
         <Route
-          path="/dashboard"
+          path="/"
           element={
             <PrivateRoute isLoggedIn={isLoggedIn}>
               <OverviewPage />
