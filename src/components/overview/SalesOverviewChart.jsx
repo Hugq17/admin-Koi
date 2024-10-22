@@ -11,18 +11,18 @@ import {
 import { motion } from "framer-motion";
 
 const salesData = [
-  { name: "Jul", sales: 4200 },
-  { name: "Aug", sales: 3800 },
-  { name: "Sep", sales: 5100 },
-  { name: "Jul", sales: 3900 },
-  { name: "Jul", sales: 5200 },
-  { name: "Jul", sales: 2300 },
-  { name: "Jul", sales: 4200 },
-  { name: "Jul", sales: 2800 },
-  { name: "Jul", sales: 3600 },
-  { name: "Jul", sales: 5900 },
-  { name: "Jul", sales: 1000 },
-  { name: "Jul", sales: 4200 },
+  { name: "Tháng 1", sales: 4200 },
+  { name: "Tháng 2", sales: 3800 },
+  { name: "Tháng 3", sales: 5100 },
+  { name: "Tháng 4", sales: 3900 },
+  { name: "Tháng 5", sales: 5200 },
+  { name: "Tháng 6", sales: 2300 },
+  { name: "Tháng 7", sales: 4200 },
+  { name: "Tháng 8", sales: 2800 },
+  { name: "Tháng 9", sales: 3600 },
+  { name: "Tháng 10", sales: 5900 },
+  { name: "Tháng 11", sales: 1000 },
+  { name: "Tháng 12", sales: 4200 },
 ];
 const SalesOverviewChart = () => {
   return (
@@ -32,7 +32,7 @@ const SalesOverviewChart = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
     >
-      <h2 className="text-lg font-medium mb-4 text-gray-100">Sales Overview</h2>
+      <h2 className="text-lg font-medium mb-4 text-gray-100">Danh số bán hàng</h2>
       <div className="h-80">
         <ResponsiveContainer width={"100%"} height={"100%"}>
           <LineChart data={salesData}>

@@ -1,5 +1,5 @@
 import React from "react";
-import Profile from "../components/common/settings/Profile";
+import Profile from "../components/settings/Profile";
 import Header from "../components/common/Header";
 
 const SettingsPage = () => {
