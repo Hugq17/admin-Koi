@@ -1,27 +1,27 @@
 import { motion } from "framer-motion";
-import { Edit, Search, Trash2 } from "lucide-react";
+import { Edit, Search, Timer, Trash2 } from "lucide-react";
 import { useState } from "react";
 
-const PRODUCT_DATA = [
-	{ id: 1, name: "Bơm JEBAO LP16000", category: "Xử lí nước", price: 350000, description:"siêu xịn" },
-	{ id: 2, name: "Bơm JEBAO LP35000", category: "Xử lí nước", price: 550000, description:"siêu xịn"  },
-	{ id: 3, name: "Cám Nhật Hikari Color Tăng Màu", category: "Thức ăn cho Koi", price: 220000, description:"siêu xịn"  },
-	{ id: 4, name: "Cám Nhật Hikari tăng trưởng", category: "Thức ăn cho Koi", price: 280000, description:"siêu xịn"  },
-	{ id: 5, name: "Elbagin Tetra Nhật siêu dưỡng", category: "Phòng trị bệnh", price: 350000, description:"siêu xịn"  },
+const BLOG_DATA = [
+	{ id: 1, title: "Bơm JEBAO LP16000", content: "Nice", createAt:"2023-07-01", authorName: "TienPM"},
+	{ id: 2, title: "Bơm JEBAO LP35000", content: "Xử lí nước", createAt: "2023-07-01", authorName: "TienPM"},
+	{ id: 3, title: "Cám Nhật Hikari Color Tăng Màu", content: "Thức ăn cho Koi", createAt: "2023-07-02", authorName: "TienPM"},
+	{ id: 4, title: "Cám Nhật Hikari tăng trưởng", content: "Thức ăn cho Koi", createAt: "2023-07-02", authorName: "TienPM"},
+	{ id: 5, title: "Elbagin Tetra Nhật siêu dưỡng", content: "Phòng trị bệnh", createAt: "2023-07-03", authorName: "TienPM"},
 ];
 
-const ProductsTable = () => {
+const BlogsTable = () => {
 	const [searchTerm, setSearchTerm] = useState("");
-	const [filteredProducts, setFilteredProducts] = useState(PRODUCT_DATA);
+	const [filteredBlogs, setFilteredBlogs] = useState(BLOG_DATA);
 
 	const handleSearch = (e) => {
 		const term = e.target.value.toLowerCase();
 		setSearchTerm(term);
-		const filtered = PRODUCT_DATA.filter(
-			(product) => product.name.toLowerCase().includes(term) || product.category.toLowerCase().includes(term)
+		const filtered = BLOG_DATA.filter(
+			(blog) => blog.title.toLowerCase().includes(term) || blog.content.toLowerCase().includes(term)
 		);
 
-		setFilteredProducts(filtered);
+		setFilteredBlogs(filtered);
 	};
 
 	return (
@@ -32,11 +32,11 @@ const ProductsTable = () => {
 			transition={{ delay: 0.2 }}
 		>
 			<div className='flex justify-between items-center mb-6'>
-				<h2 className='text-xl font-semibold text-gray-100'>Danh sách sản phẩm</h2>
+				<h2 className='text-xl font-semibold text-gray-100'>Danh sách bài viết</h2>
 				<div className='relative'>
 					<input
 						type='text'
-						placeholder='Tìm kiếm sản phẩm...'
+						placeholder='Tìm kiếm bài viết...'
 						className='bg-gray-700 text-white placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
 						onChange={handleSearch}
 						value={searchTerm}
@@ -50,16 +50,16 @@ const ProductsTable = () => {
 					<thead>
 						<tr>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Tên
+								Tiêu đề
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Danh mục
+								Nội dung
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Giá bán
+								Ngày tạo
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Miêu tả
+								Tác giả
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Thao tác
@@ -68,30 +68,26 @@ const ProductsTable = () => {
 					</thead>
 
 					<tbody className='divide-y divide-gray-700'>
-						{filteredProducts.map((product) => (
+						{filteredBlogs.map((blog) => (
 							<motion.tr
-								key={product.id}
+								key={blog.id}
 								initial={{ opacity: 0 }}
 								animate={{ opacity: 1 }}
 								transition={{ duration: 0.3 }}
 							>
 								<td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100 flex gap-2 items-center'>
-									<img
-										src='https://images.unsplash.com/photo-1627989580309-bfaf3e58af6f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8d2lyZWxlc3MlMjBlYXJidWRzfGVufDB8fDB8fHww'
-										alt='Product img'
-										className='size-10 rounded-full'
-									/>
-									{product.name}
+									{blog.title}
 								</td>
 
 								<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-									{product.category}
+									
+									{blog.content.length > 50 ? blog.content.slice(0, 50) + '...' : blog.content}
 								</td>
 
 								<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-									{product.price.toFixed(0)} VNĐ
+									{new Intl.DateTimeFormat("vi-VN").format(new Date(blog.createAt))}
 								</td>
-								<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{product.description}</td>
+								<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{blog.authorName}</td>
 								<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
 									<button className='text-indigo-400 hover:text-indigo-300 mr-2'>
 										<Edit size={18} />
@@ -108,4 +104,4 @@ const ProductsTable = () => {
 		</motion.div>
 	);
 };
-export default ProductsTable;
+export default BlogsTable;

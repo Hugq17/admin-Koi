@@ -2,7 +2,7 @@ import React from "react";
 import Header from "../components/common/Header";
 import { motion } from "framer-motion";
 import StatCard from "../components/common/StatCard";
-import { BarChart2, BookOpen, ShoppingBag, ShoppingCart, Users, Zap } from "lucide-react";
+import { BarChart2, BookOpen, Package, ShoppingBag, ShoppingCart, Users, Zap } from "lucide-react";
 import SalesOverviewChart from "../components/overview/SalesOverviewChart";
 import CategoryDistributionChart from "../components/overview/CategoryDistributionChart";
 import SalesChannelChart from "../components/overview/SalesChannelChart";
@@ -26,7 +26,7 @@ const OverviewPage = () => {
           />
             <StatCard
               name="Sản phẩm"
-              icon={ShoppingBag}
+              icon={Package}
               value="15"
               color="#8B5CF6"
             />

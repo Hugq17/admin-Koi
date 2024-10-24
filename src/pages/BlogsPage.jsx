@@ -3,15 +3,15 @@ import { motion } from "framer-motion";
 import Header from "../components/common/Header";
 import StatCard from "../components/common/StatCard";
 
-import { AlertTriangle, Boxes, DollarSign, Package, TrendingUp } from "lucide-react";
+import { AlertTriangle, BookCheck, BookOpen, BookOpenCheck, DollarSign, Package, TrendingUp } from "lucide-react";
 import CategoryDistributionChart from "../components/overview/CategoryDistributionChart";
 import SalesTrendChart from "../components/products/SalesTrendChart";
-import ProductsTable from "../components/products/ProductsTable";
+import BlogsTable from "../components/blogs/BlogsTable";
 
-const ProductsPage = () => {
+const BlogsPage = () => {
 	return (
 		<div className='flex-1 overflow-auto relative z-10'>
-			<Header title='Sản phẩm' />
+			<Header title='Bài viết' />
 
 			<main className='max-w-7xl mx-auto py-6 px-4 lg:px-8'>
 				{/* STATS */}
@@ -21,19 +21,17 @@ const ProductsPage = () => {
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 1 }}
 				>
-					<StatCard name='Tổng sản phẩm' icon={Package} value={15} color='#6366F1' />
-					<StatCard name='Tổng danh mục' icon={Boxes} value={5} color='#10B981' />
+					<StatCard name='Tổng bài viết' icon={BookOpen} value={24} color='#6366F1' />
+					<StatCard name='Bài viết mới' icon={BookOpenCheck} value={5} color='#10B981' />
 				</motion.div>
 
-				<ProductsTable />
+				<BlogsTable />
 
 				{/* CHARTS */}
 				<div className='grid grid-col-1 lg:grid-cols-2 gap-8'>
-					{/* <SalesTrendChart /> */}
-					<CategoryDistributionChart />
 				</div>
 			</main>
 		</div>
 	);
 };
-export default ProductsPage;
+export default BlogsPage;
