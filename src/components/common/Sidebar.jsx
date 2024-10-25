@@ -11,6 +11,7 @@ import {
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import logo from "../../assets/brand/logo.png";
 
 const SIDEBAR_ITEMS = [
   {
@@ -47,7 +48,28 @@ const Sidebar = () => {
           <Menu size={24} />
         </motion.button>
 
-        <nav className="mt-8 flex-grow">
+        <div className="mt-8 flex flex-col items-center">
+          <AnimatePresence>
+            {isSidebarOpen && (
+              <motion.div
+                className="text-xl font-semibold text-gray-100"
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: "auto" }}
+                exit={{ opacity: 0, width: 0 }}
+                transition={{ duration: 0.2, delay: 0.3 }}
+              >
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <img
+            src={logo}
+            className="h-24 w-auto my-2"
+            alt="Logo"
+            style={{ width: "auto", height: "144px" }}
+          />
+        </div>
+
+        <nav className="mt-2 flex-grow">
           {SIDEBAR_ITEMS.map((item) => (
             <Link key={item.href} to={item.href}>
               <motion.div className="flex items-center p-4 text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors mb-2">
@@ -77,3 +99,5 @@ const Sidebar = () => {
   );
 };
 export default Sidebar;
+
+

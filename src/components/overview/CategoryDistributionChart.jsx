@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react"; // Thêm useEffect và useState
 import { motion } from "framer-motion";
 import {
   PieChart,
@@ -8,18 +8,45 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-
-const categoryData = [
-  { name: "Dinh dưỡng thiết yếu", value: 4500 },
-  { name: "Thức ăn cho Koi", value: 3200 },
-  { name: "Xử lí nước", value: 2800 },
-  { name: "Phòng trị bệnh", value: 2100 },
-  { name: "Men vi sinh", value: 1900 },
-];
+import axios from "axios"; // Thêm axios
 
 const COLORS = ["#6366F1", "#8B5CF6", "#EC4899", "#10B981", "#F59E0B"];
 
 const CategoryDistributionChart = () => {
+  const [categoryData, setCategoryData] = useState([]); // State cho dữ liệu danh mục
+
+  useEffect(() => {
+    const fetchCategoryData = async () => {
+      try {
+        const response = await axios.get('https://koi-care-server.azurewebsites.net/api/product/get-all'); // Thay thế URL bằng API của bạn
+        const productData = response.data.products;
+
+        // Tính tổng số sản phẩm cho mỗi danh mục
+        const categories = {};
+
+        productData.forEach(product => {
+          if (categories[product.category]) {
+            categories[product.category] += 1; // Tăng số lượng sản phẩm trong danh mục
+          } else {
+            categories[product.category] = 1; // Khởi tạo số lượng cho danh mục mới
+          }
+        });
+
+        // Chuyển đổi categories thành định dạng dữ liệu cho biểu đồ
+        const formattedData = Object.keys(categories).map(name => ({
+          name,
+          value: categories[name],
+        }));
+
+        setCategoryData(formattedData);
+      } catch (error) {
+        console.error("Error fetching category data: ", error);
+      }
+    };
+
+    fetchCategoryData();
+  }, []);
+
   return (
     <motion.div
       className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700"
