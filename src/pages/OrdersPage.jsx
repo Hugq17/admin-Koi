@@ -1,18 +1,39 @@
+import { useState, useEffect } from "react";
 import { CheckCircle, Clock, DollarSign, ShoppingBag, ShoppingCart } from "lucide-react";
 import { motion } from "framer-motion";
+import axios from "axios";
 
 import Header from "../components/common/Header";
 import StatCard from "../components/common/StatCard";
-import DailyOrders from "../components/orders/DailyOrders";
-import OrderDistribution from "../components/orders/OrderDistribution";
 import OrdersTable from "../components/orders/OrdersTable";
 
-const orderStats = {
-	totalOrders: "12",
-	totalRevenue: "7500000 VNĐ",
-};
-
 const OrdersPage = () => {
+	const [orderStats, setOrderStats] = useState({
+		totalOrders: "0",
+		totalRevenue: "0 VNĐ",
+	});
+
+	const fetchOrderStats = async () => {
+		try {
+			const response = await axios.get('https://koi-care-server.azurewebsites.net/api/order/get-all');
+			const orders = response.data.orders;
+
+			const totalOrders = orders.length; // Tổng số giao dịch
+			const totalRevenue = orders.reduce((acc, order) => acc + order.total, 0); // Tổng doanh thu
+
+			setOrderStats({
+				totalOrders: totalOrders.toString(),
+				totalRevenue: `${totalRevenue.toLocaleString('vi-VN')} VNĐ`, // Định dạng doanh thu
+			});
+		} catch (error) {
+			console.error("Error fetching order stats: ", error);
+		}
+	};
+
+	useEffect(() => {
+		fetchOrderStats();
+	}, []);
+
 	return (
 		<div className='flex-1 relative z-10 overflow-auto'>
 			<Header title={"Giao dịch"} />
@@ -28,14 +49,10 @@ const OrdersPage = () => {
 					<StatCard name='Tổng doanh thu' icon={DollarSign} value={orderStats.totalRevenue} color='#EF4444' />
 				</motion.div>
 
-				{/* <div className='grid grid-cols-1 lg:grid-cols-1 gap-8 mb-8'>
-					<DailyOrders />
-					<OrderDistribution />
-				</div> */}
-
 				<OrdersTable />
 			</main>
 		</div>
 	);
 };
+
 export default OrdersPage;

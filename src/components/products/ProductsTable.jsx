@@ -1,28 +1,51 @@
 import { motion } from "framer-motion";
 import { Edit, Search, Trash2 } from "lucide-react";
-import { useState } from "react";
-
-const PRODUCT_DATA = [
-	{ id: 1, name: "Bơm JEBAO LP16000", category: "Xử lí nước", price: 350000, description:"siêu xịn" },
-	{ id: 2, name: "Bơm JEBAO LP35000", category: "Xử lí nước", price: 550000, description:"siêu xịn"  },
-	{ id: 3, name: "Cám Nhật Hikari Color Tăng Màu", category: "Thức ăn cho Koi", price: 220000, description:"siêu xịn"  },
-	{ id: 4, name: "Cám Nhật Hikari tăng trưởng", category: "Thức ăn cho Koi", price: 280000, description:"siêu xịn"  },
-	{ id: 5, name: "Elbagin Tetra Nhật siêu dưỡng", category: "Phòng trị bệnh", price: 350000, description:"siêu xịn"  },
-];
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 const ProductsTable = () => {
 	const [searchTerm, setSearchTerm] = useState("");
-	const [filteredProducts, setFilteredProducts] = useState(PRODUCT_DATA);
+	const [products, setProducts] = useState([]);
+	const [filteredProducts, setFilteredProducts] = useState([]);
+	const [currentPage, setCurrentPage] = useState(1); // Thiết lập trạng thái cho trang hiện tại
+	const [postsPerPage] = useState(5); // Thiết lập số lượng bài viết trên mỗi trang
+
+	useEffect(() => {
+		const fetchProducts = async () => {
+			try {
+				const response = await axios.get('https://koi-care-server.azurewebsites.net/api/product/get-all');
+				console.log("Fetched products:", response.data);
+				setProducts(response.data.products);
+				setFilteredProducts(response.data.products);
+			} catch (error) {
+				console.error("Error fetching products: ", error);
+			}
+		};
+
+		fetchProducts();
+	}, []);
 
 	const handleSearch = (e) => {
 		const term = e.target.value.toLowerCase();
 		setSearchTerm(term);
-		const filtered = PRODUCT_DATA.filter(
-			(product) => product.name.toLowerCase().includes(term) || product.category.toLowerCase().includes(term)
+		const filtered = products.filter(
+			(product) => 
+				(product?.name?.toLowerCase() || "").includes(term) || 
+				(product?.category?.toLowerCase() || "").includes(term)
 		);
-
 		setFilteredProducts(filtered);
+		setCurrentPage(1); // Đặt lại trang đầu tiên trên khi tìm kiếm
 	};
+
+	// Xử lý phân trang
+	const indexOfLastProduct = currentPage * postsPerPage; // Mục trang cuối
+	const indexOfFirstProduct = indexOfLastProduct - postsPerPage; // Mục trang đầu
+	const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct); // Các bài viết hiện tại dựa trên phân trang
+	// Chuyển trang
+	const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+	// Tính tổng số trang
+	const totalPages = Math.ceil(filteredProducts.length / postsPerPage);
 
 	return (
 		<motion.div
@@ -49,63 +72,84 @@ const ProductsTable = () => {
 				<table className='min-w-full divide-y divide-gray-700'>
 					<thead>
 						<tr>
-							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Tên
-							</th>
-							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Danh mục
-							</th>
-							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Giá bán
-							</th>
-							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Miêu tả
-							</th>
-							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Thao tác
-							</th>
+							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>Tên</th>
+							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>Danh mục</th>
+							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>Giá bán</th>
+							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>Miêu tả</th>
+							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>Thao tác</th>
 						</tr>
 					</thead>
 
 					<tbody className='divide-y divide-gray-700'>
-						{filteredProducts.map((product) => (
-							<motion.tr
-								key={product.id}
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}
-								transition={{ duration: 0.3 }}
-							>
-								<td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100 flex gap-2 items-center'>
-									<img
-										src='https://images.unsplash.com/photo-1627989580309-bfaf3e58af6f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8d2lyZWxlc3MlMjBlYXJidWRzfGVufDB8fDB8fHww'
-										alt='Product img'
-										className='size-10 rounded-full'
-									/>
-									{product.name}
-								</td>
+						{currentProducts.length > 0 ? (
+							currentProducts.map((product) => (
+								<motion.tr
+									key={product.id}
+									initial={{ opacity: 0 }}
+									animate={{ opacity: 1 }}
+									transition={{ duration: 0.3 }}
+								>
+									<td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100 flex gap-2 items-center'>
+										<img
+											src={product.imageUrl || 'https://via.placeholder.com/150'} // Default image URL if none exists
+											alt='Product img'
+											className='size-10 rounded-full'
+										/>
+										{product.name.length > 30 ? `${product.name.slice(0, 30)}...` : product.name}
+									</td>
+									<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
+										{product.category}
+									</td>
 
-								<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-									{product.category}
+									<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
+										{product.price?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+									</td>
+									<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
+										{product.description.length > 50 ? `${product.description.slice(0, 50)}...` : product.description}
+									</td>
+									<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
+										<button className='text-indigo-400 hover:text-indigo-300 mr-2'>
+											<Edit size={18} />
+										</button>
+										<button className='text-red-400 hover:text-red-300'>
+											<Trash2 size={18} />
+										</button>
+									</td>
+								</motion.tr>
+							))
+						) : (
+							<tr>
+								<td colSpan="5" className="text-center text-gray-400 py-4">
+									Không có sản phẩm nào được tìm thấy.
 								</td>
-
-								<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-									{product.price.toFixed(0)} VNĐ
-								</td>
-								<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{product.description}</td>
-								<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-									<button className='text-indigo-400 hover:text-indigo-300 mr-2'>
-										<Edit size={18} />
-									</button>
-									<button className='text-red-400 hover:text-red-300'>
-										<Trash2 size={18} />
-									</button>
-								</td>
-							</motion.tr>
-						))}
+							</tr>
+						)}
 					</tbody>
 				</table>
+			</div>
+
+			{/* Kiểm soát phân trang */}
+			<div className='flex justify-between items-center mt-4'>
+				<button
+					className='text-gray-400 hover:text-gray-300 disabled:opacity-50'
+					onClick={() => paginate(currentPage - 1)}
+					disabled={currentPage === 1}
+				>
+					Trước
+				</button>
+				<span className='text-gray-100'>
+					Trang {currentPage} / {totalPages}
+				</span>
+				<button
+					className='text-gray-400 hover:text-gray-300 disabled:opacity-50'
+					onClick={() => paginate(currentPage + 1)}
+					disabled={currentPage === totalPages}
+				>
+					Kế tiếp
+				</button>
 			</div>
 		</motion.div>
 	);
 };
+
 export default ProductsTable;

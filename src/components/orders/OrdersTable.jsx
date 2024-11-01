@@ -1,27 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Search, Eye } from "lucide-react";
-
-const orderData = [
-	{ id: "ORD001", customer: "John Doe", total: 235.4, status: "Hoàn thành", date: "2023-07-01" },
-	{ id: "ORD002", customer: "Jane Smith", total: 412.0, status: "Đang xử lý", date: "2023-07-02" },
-	{ id: "ORD003", customer: "Bob Johnson", total: 162.5, status: "Đang giao hàng", date: "2023-07-03" },
-	{ id: "ORD004", customer: "Alice Brown", total: 750.2, status: "Chưa thanh toán", date: "2023-07-04" },
-	{ id: "ORD005", customer: "Charlie Wilson", total: 95.8, status: "Hoàn thành", date: "2023-07-05" },
-	{ id: "ORD006", customer: "Eva Martinez", total: 310.75, status: "Đang xử lý", date: "2023-07-06" },
-	{ id: "ORD007", customer: "David Lee", total: 528.9, status: "Đang giao hàng", date: "2023-07-07" },
-	{ id: "ORD008", customer: "Grace Taylor", total: 189.6, status: "Hoàn thành", date: "2023-07-08" },
-];
+import axios from "axios";
 
 const OrdersTable = () => {
 	const [searchTerm, setSearchTerm] = useState("");
-	const [filteredOrders, setFilteredOrders] = useState(orderData);
+	const [orders, setOrders] = useState([]);
+	const [filteredOrders, setFilteredOrders] = useState([]);
+
+	useEffect(() => {
+		const fetchOrders = async () => {
+			try {
+				const response = await axios.get('https://koi-care-server.azurewebsites.net/api/order/get-all');
+				setOrders(response.data.orders); // Lưu dữ liệu đơn hàng vào state
+				setFilteredOrders(response.data.orders); // Cập nhật danh sách đơn hàng
+			} catch (error) {
+				console.error("Error fetching orders: ", error);
+			}
+		};
+
+		fetchOrders();
+	}, []);
 
 	const handleSearch = (e) => {
 		const term = e.target.value.toLowerCase();
 		setSearchTerm(term);
-		const filtered = orderData.filter(
-			(order) => order.id.toLowerCase().includes(term) || order.customer.toLowerCase().includes(term)
+		const filtered = orders.filter(
+			(order) =>
+				order.id.toString().includes(term) || // Chuyển đổi ID thành chuỗi để so sánh
+				order.customerName.toLowerCase().includes(term) // Tìm kiếm theo tên khách hàng
 		);
 		setFilteredOrders(filtered);
 	};
@@ -73,51 +80,56 @@ const OrdersTable = () => {
 					</thead>
 
 					<tbody className='divide divide-gray-700'>
-						{filteredOrders.map((order) => (
-							<motion.tr
-								key={order.id}
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}
-								transition={{ duration: 0.3 }}
-							>
-								<td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
-									{order.id}
+						{filteredOrders.length === 0 ? ( // Kiểm tra xem có đơn hàng nào không
+							<tr>
+								<td colSpan={6} className='px-6 py-4 whitespace-nowrap text-sm text-gray-300 text-center'>
+									Không có giao dịch nào được tìm thấy.
 								</td>
-								<td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
-									{order.customer}
-								</td>
-								<td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
-									${order.total.toFixed(2)}
-								</td>
-								<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-									<span
-										className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-											order.status === "Hoàn thành"
-												? "bg-green-100 text-green-800"
-												: order.status === "Đang xử lý"
-												? "bg-yellow-100 text-yellow-800"
-												: order.status === "Đang giao hàng"
-												? "bg-blue-100 text-blue-800"
-												: "bg-red-100 text-red-800"
-										}`}
-									>
-										{order.status}
-									</span>
-								</td>
-								<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-									{new Intl.DateTimeFormat("vi-VN").format(new Date(order.date))}
-								</td>
-								<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-									<button className='text-indigo-400 hover:text-indigo-300 mr-2'>
-										<Eye size={18} />
-									</button>
-								</td>
-							</motion.tr>
-						))}
+							</tr>
+						) : (
+							filteredOrders.map((order) => (
+								<motion.tr
+									key={order.id}
+									initial={{ opacity: 0 }}
+									animate={{ opacity: 1 }}
+									transition={{ duration: 0.3 }}
+								>
+									<td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
+										{order.id}
+									</td>
+									<td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
+										{order.customerName}
+									</td>
+									<td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
+										${order.total.toFixed(2)} {/* Đảm bảo là số với 2 chữ số thập phân */}
+									</td>
+									<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
+										<span
+											className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+												order.isCompleted
+													? "bg-green-100 text-green-800" // Hoàn thành
+													: "bg-red-100 text-red-800" // Chưa hoàn thành
+											}`}
+										>
+											{order.isCompleted ? "Hoàn thành" : "Chưa hoàn thành"}
+										</span>
+									</td>
+									<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
+										{new Intl.DateTimeFormat("vi-VN").format(new Date(order.orderDate))} {/* Định dạng lại ngày */}
+									</td>
+									<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
+										<button className='text-indigo-400 hover:text-indigo-300 mr-2'>
+											<Eye size={18} />
+										</button>
+									</td>
+								</motion.tr>
+							))
+						)}
 					</tbody>
 				</table>
 			</div>
 		</motion.div>
 	);
 };
+
 export default OrdersTable;

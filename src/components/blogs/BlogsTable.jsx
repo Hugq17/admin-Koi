@@ -1,28 +1,51 @@
 import { motion } from "framer-motion";
-import { Edit, Search, Timer, Trash2 } from "lucide-react";
-import { useState } from "react";
-
-const BLOG_DATA = [
-	{ id: 1, title: "Bơm JEBAO LP16000", content: "Nice", createAt:"2023-07-01", authorName: "TienPM"},
-	{ id: 2, title: "Bơm JEBAO LP35000", content: "Xử lí nước", createAt: "2023-07-01", authorName: "TienPM"},
-	{ id: 3, title: "Cám Nhật Hikari Color Tăng Màu", content: "Thức ăn cho Koi", createAt: "2023-07-02", authorName: "TienPM"},
-	{ id: 4, title: "Cám Nhật Hikari tăng trưởng", content: "Thức ăn cho Koi", createAt: "2023-07-02", authorName: "TienPM"},
-	{ id: 5, title: "Elbagin Tetra Nhật siêu dưỡng", content: "Phòng trị bệnh", createAt: "2023-07-03", authorName: "TienPM"},
-];
+import { Edit, Search, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 const BlogsTable = () => {
 	const [searchTerm, setSearchTerm] = useState("");
-	const [filteredBlogs, setFilteredBlogs] = useState(BLOG_DATA);
+	const [blogs, setBlogs] = useState([]); 
+	const [filteredBlogs, setFilteredBlogs] = useState([]);
+	const [currentPage, setCurrentPage] = useState(1); // Thiết lập trạng thái cho trang hiện tại
+	const [postsPerPage] = useState(5); // Thiết lập số lượng bài viết trên mỗi trang
 
+	// Hàm gọi API để lấy danh sách người dùng
+	useEffect(() => {
+		const fetchBlogs = async () => {
+			try {
+				const response = await axios.get('https://koi-care-server.azurewebsites.net/api/blogs/get-all');
+				setBlogs(response.data.blogs); 
+				setFilteredBlogs(response.data.blogs); // Cập nhật state với dữ liệu từ API
+			} catch (error) {
+				console.error("Error fetching blogs: ", error);
+			}
+		};
+
+		fetchBlogs();
+	}, []);
+
+	// Hàm xử lý tìm kiếm
 	const handleSearch = (e) => {
 		const term = e.target.value.toLowerCase();
 		setSearchTerm(term);
-		const filtered = BLOG_DATA.filter(
-			(blog) => blog.title.toLowerCase().includes(term) || blog.content.toLowerCase().includes(term)
+		const filtered = blogs.filter(
+			(blog) => blog.title.toLowerCase().includes(term) || blog.authorName.toLowerCase().includes(term)
 		);
-
 		setFilteredBlogs(filtered);
+		setCurrentPage(1); // Đặt lại trang đầu tiên trên khi tìm kiếm
 	};
+
+	// Xử lý phân trang
+	const indexOfLastBlog = currentPage * postsPerPage; // Mục trang cuối
+	const indexOfFirstBlog = indexOfLastBlog - postsPerPage; // Mục trang đầu
+	const currentBlogs = filteredBlogs.slice(indexOfFirstBlog, indexOfLastBlog); // Các bài viết hiện tại dựa trên phân trang
+
+	// Chuyển trang
+	const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+	// Tính tổng số trang
+	const totalPages = Math.ceil(filteredBlogs.length / postsPerPage);
 
 	return (
 		<motion.div
@@ -49,26 +72,16 @@ const BlogsTable = () => {
 				<table className='min-w-full divide-y divide-gray-700'>
 					<thead>
 						<tr>
-							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Tiêu đề
-							</th>
-							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Nội dung
-							</th>
-							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Ngày tạo
-							</th>
-							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Tác giả
-							</th>
-							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Thao tác
-							</th>
+							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>Tiêu đề</th>
+							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>Nội dung</th>
+							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>Ngày tạo</th>
+							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>Tác giả</th>
+							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>Thao tác</th>
 						</tr>
 					</thead>
 
 					<tbody className='divide-y divide-gray-700'>
-						{filteredBlogs.map((blog) => (
+						{currentBlogs.map((blog) => (
 							<motion.tr
 								key={blog.id}
 								initial={{ opacity: 0 }}
@@ -76,16 +89,15 @@ const BlogsTable = () => {
 								transition={{ duration: 0.3 }}
 							>
 								<td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100 flex gap-2 items-center'>
-									{blog.title}
+									{blog.title.length > 30 ? blog.title.slice(0, 30) + '...' : blog.title}
 								</td>
 
 								<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-									
 									{blog.content.length > 50 ? blog.content.slice(0, 50) + '...' : blog.content}
 								</td>
 
 								<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-									{new Intl.DateTimeFormat("vi-VN").format(new Date(blog.createAt))}
+									{new Intl.DateTimeFormat("vi-VN").format(new Date(blog.createdAt))}
 								</td>
 								<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{blog.authorName}</td>
 								<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
@@ -101,7 +113,29 @@ const BlogsTable = () => {
 					</tbody>
 				</table>
 			</div>
+
+			{/* Kiểm soát phân trang */}
+			<div className='flex justify-between items-center mt-4'>
+				<button
+					className='text-gray-400 hover:text-gray-300 disabled:opacity-50'
+					onClick={() => paginate(currentPage - 1)}
+					disabled={currentPage === 1}
+				>
+					Trước
+				</button>
+				<span className='text-gray-100'>
+					Trang {currentPage} / {totalPages}
+				</span>
+				<button
+					className='text-gray-400 hover:text-gray-300 disabled:opacity-50'
+					onClick={() => paginate(currentPage + 1)}
+					disabled={currentPage === totalPages}
+				>
+					Kế tiếp
+				</button>
+			</div>
 		</motion.div>
 	);
 };
+
 export default BlogsTable;

@@ -1,14 +1,40 @@
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 
 import Header from "../components/common/Header";
 import StatCard from "../components/common/StatCard";
 
-import { AlertTriangle, BookCheck, BookOpen, BookOpenCheck, DollarSign, Package, TrendingUp } from "lucide-react";
-import CategoryDistributionChart from "../components/overview/CategoryDistributionChart";
-import SalesTrendChart from "../components/products/SalesTrendChart";
+import { BookOpen, BookOpenCheck } from "lucide-react";
 import BlogsTable from "../components/blogs/BlogsTable";
+import axios from "axios";
 
 const BlogsPage = () => {
+	const [totalBlogs, setTotalBlogs] = useState(0);
+	const [newBlogsCount, setNewBlogsCount] = useState(0);
+
+	useEffect(() => {
+		const fetchBlogStats = async () => {
+			try {
+				const response = await axios.get('https://koi-care-server.azurewebsites.net/api/blogs/get-all');
+				const blogs = response.data.blogs;
+
+				// Tổng số bài viết
+				setTotalBlogs(blogs.length);
+
+				// Tính số bài viết mới trong tuần
+				const oneWeekAgo = new Date();
+				oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+				const newBlogs = blogs.filter(blog => new Date(blog.createdAt) >= oneWeekAgo);
+				setNewBlogsCount(newBlogs.length);
+			} catch (error) {
+				console.error("Error fetching blog stats: ", error);
+			}
+		};
+
+		fetchBlogStats();
+	}, []);
+
 	return (
 		<div className='flex-1 overflow-auto relative z-10'>
 			<Header title='Bài viết' />
@@ -21,17 +47,19 @@ const BlogsPage = () => {
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 1 }}
 				>
-					<StatCard name='Tổng bài viết' icon={BookOpen} value={24} color='#6366F1' />
-					<StatCard name='Bài viết mới' icon={BookOpenCheck} value={5} color='#10B981' />
+					<StatCard name='Tổng bài viết' icon={BookOpen} value={totalBlogs} color='#6366F1' />
+					<StatCard name='Bài viết mới' icon={BookOpenCheck} value={newBlogsCount} color='#10B981' />
 				</motion.div>
 
 				<BlogsTable />
 
 				{/* CHARTS */}
 				<div className='grid grid-col-1 lg:grid-cols-2 gap-8'>
+					{/* Có thể thêm biểu đồ tại đây */}
 				</div>
 			</main>
 		</div>
 	);
 };
+
 export default BlogsPage;
