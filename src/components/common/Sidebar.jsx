@@ -4,9 +4,9 @@ import {
   Menu,
   Package,
   Settings,
-  ShoppingBag,
   ShoppingCart,
   Users,
+  LogOut,
 } from "lucide-react";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -24,11 +24,10 @@ const SIDEBAR_ITEMS = [
   { name: "Sản phẩm", icon: Package, color: "#8B5CF6", href: "/products" },
   { name: "Bài viết", icon: LucideBookOpen, color: "#10B981", href: "/blogs" },
   { name: "Giao dịch", icon: ShoppingCart, color: "#F59E0B", href: "/orders" },
-  // { name: "Analytics", icon: TrendingUp, color: "#3B82F6", href: "/analytics" },
   { name: "Cài đặt", icon: Settings, color: "#6EE7B7", href: "/settings" },
 ];
 
-const Sidebar = () => {
+const Sidebar = ({ logout }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   return (
@@ -57,8 +56,7 @@ const Sidebar = () => {
                 animate={{ opacity: 1, width: "auto" }}
                 exit={{ opacity: 0, width: 0 }}
                 transition={{ duration: 0.2, delay: 0.3 }}
-              >
-              </motion.div>
+              ></motion.div>
             )}
           </AnimatePresence>
           <img
@@ -94,10 +92,30 @@ const Sidebar = () => {
             </Link>
           ))}
         </nav>
+        
+        {/* Logout Button */}
+        <button
+          onClick={logout}
+          className="flex items-center p-4 text-red-500 hover:bg-red-500 hover:text-white transition-colors rounded-lg mt-4"
+        >
+          <LogOut size={20} style={{ color: "red", minWidth: "20px" }} />
+          <AnimatePresence>
+            {isSidebarOpen && (
+              <motion.span
+                className="ml-4 whitespace-nowrap"
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: "auto" }}
+                exit={{ opacity: 0, width: 0 }}
+                transition={{ duration: 0.2, delay: 0.3 }}
+              >
+                Đăng xuất
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </button>
       </div>
     </motion.div>
   );
 };
+
 export default Sidebar;
-
-

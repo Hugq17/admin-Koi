@@ -33,9 +33,14 @@ function App() {
     setIsLoggedIn(Boolean(token));
   };
 
+  const logout = () => {
+    localStorage.removeItem("authToken");
+    setIsLoggedIn(false);
+  };
+
   return (
     <div className="flex h-screen bg-gray-900 text-gray-100 overflow-hidden">
-      {isLoggedIn && <Sidebar />}
+      {isLoggedIn && <Sidebar logout={logout} />}
       <Routes>
         <Route path="/login" element={<Login updateStatus={updateStatus} />} />
         <Route
