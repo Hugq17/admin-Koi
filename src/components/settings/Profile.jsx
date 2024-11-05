@@ -1,16 +1,44 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import SettingSection from "./SettingSection";
 import { User } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
-  const navigate = useNavigate(); // Initialize the useNavigate hook
+  const [user, setUser] = useState(null); // State to hold user data
+  const [loading, setLoading] = useState(true); // State to manage loading state
+  const [error, setError] = useState(null); // State to manage error state
 
-  const handleLogout = () => {
-    localStorage.removeItem("authToken"); // Remove token from localStorage
-    navigate("/login"); // Redirect to the login page
-  };
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const token = localStorage.getItem("authToken"); // Retrieve the token from localStorage
 
+      try {
+        const response = await axios.get("https://koi-care-at-home-server-h3fyedfeeecdg7fh.southeastasia-01.azurewebsites.net/api/account/user", {
+          headers: {
+            Authorization: `Bearer ${token}`, // Set the authorization header
+          },
+        });
+        setUser(response.data); // Update state with user data
+      } catch (error) {
+        setError(error.message); // Handle error
+      } finally {
+        setLoading(false); // Set loading to false
+      }
+    };
+
+    fetchUserData();
+  }, []); // Empty dependency array means this runs once on mount
+
+  // Render loading state or error message
+  if (loading) {
+    return <p className="text-gray-400">Loading...</p>;
+  }
+
+  if (error) {
+    return <p className="text-red-500">{error}</p>;
+  }
+
+  // Render user profile information
   return (
     <SettingSection icon={User} title={"Hồ sơ"}>
       <div className="flex flex-col sm:flex-row items-center mb-6">
@@ -20,21 +48,10 @@ const Profile = () => {
           className="rounded-full w-20 h-20 object-cover mr-4"
         />
         <div>
-          <h3 className="text-lg font-semibold text-gray-100">Minh Tiến</h3>
-          <p className="text-gray-400">minhtien020200@gmail.com</p>
+          <h3 className="text-lg font-semibold text-gray-100">{user.username}</h3>
+          <p className="text-gray-400">{user.email}</p>
         </div>
       </div>
-      <td>
-        <button className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">
-          Chỉnh sửa
-        </button>
-        <button
-          onClick={handleLogout} // Add onClick event for logout
-          className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded ml-2"
-        >
-          Đăng xuất
-        </button>
-      </td>
     </SettingSection>
   );
 };
