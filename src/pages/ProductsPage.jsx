@@ -15,7 +15,7 @@ const ProductsPage = () => {
 	useEffect(() => {
 		const fetchProducts = async () => {
 			try {
-				const response = await axios.get('https://koi-care-server.azurewebsites.net/api/product/get-all');
+				const response = await axios.get('https://koi-care-at-home-server-h3fyedfeeecdg7fh.southeastasia-01.azurewebsites.net/api/product/get-all');
 				const productData = response.data.products; // Truy cập vào products
 				setProducts(productData); // Lưu trữ sản phẩm
 

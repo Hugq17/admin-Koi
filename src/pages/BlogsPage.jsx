@@ -15,7 +15,7 @@ const BlogsPage = () => {
 	useEffect(() => {
 		const fetchBlogStats = async () => {
 			try {
-				const response = await axios.get('https://koi-care-server.azurewebsites.net/api/blogs/get-all');
+				const response = await axios.get('https://koi-care-at-home-server-h3fyedfeeecdg7fh.southeastasia-01.azurewebsites.net/api/blogs/get-all');
 				const blogs = response.data.blogs;
 
 				// Tổng số bài viết

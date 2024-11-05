@@ -18,15 +18,14 @@ const OverviewPage = () => {
 
   useEffect(() => {
     const fetchStats = async () => {
-      const token = "eyJhbGciOiJSUzI1NiIsImtpZCI6IjcxOGY0ZGY5MmFkMTc1ZjZhMDMwN2FiNjVkOGY2N2YwNTRmYTFlNWYiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20va29pY2FyZS00NTM4ZSIsImF1ZCI6ImtvaWNhcmUtNDUzOGUiLCJhdXRoX3RpbWUiOjE3Mjk4Mjg2MzAsInVzZXJfaWQiOiJTb3ljb25jd3ZrVFp0VVh3OFZBUVRCeHJaNkMzIiwic3ViIjoiU295Y29uY3d2a1RadFVYdzhWQVFUQnhyWjZDMyIsImlhdCI6MTcyOTgyODYzMCwiZXhwIjoxNzI5ODMyMjMwLCJlbWFpbCI6ImtvaWFkbWluQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiZmlyZWJhc2UiOnsiaWRlbnRpdGllcyI6eyJlbWFpbCI6WyJrb2lhZG1pbkBnbWFpbC5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9fQ.RQ3OlnRlR3VMSbs9zQsNs55QqCQwTpQE1aozUV1JS_dh931qI4zVJFn1MzRDaB7sSTiRn9vGY6QMWHNao5dqrmGYYqGRzuUifMgbqi-yRKD64FjeyA7bgFdElp-vf3vD3Bvzje_Yoh8SR1Gvhy7j7ZtAx8i4y0GVYZXuxdhMZjg7Fz94Woue4I53ajXqJPvewRYZIESDBkCCzCA3JISWya0zW9w7s3ZMBmTCsfnRFE4UBlR66fPjPkreS_-GXu56FwVOLivfSQq2j2pmH0L1Wm1KNkdTnsUZFhOiO3Ap1-VgoR3QdMY75unH3MKLS3dcoTEhz20jXcm5LtyUNKfOZg";
-
       try {
+        const token = localStorage.getItem("authToken"); // Ensure the token is saved in localStorage
         // Gọi từng API để lấy dữ liệu
         const [usersRes, productsRes, blogsRes, ordersRes] = await Promise.all([
-          axios.get("https://koi-care-server.azurewebsites.net/api/account/all-users", { headers: { Authorization: `Bearer ${token}` }}),
-          axios.get("https://koi-care-server.azurewebsites.net/api/product/get-all", { headers: { Authorization: `Bearer ${token}` }}),
-          axios.get("https://koi-care-server.azurewebsites.net/api/blogs/get-all", { headers: { Authorization: `Bearer ${token}` }}),
-          axios.get("https://koi-care-server.azurewebsites.net/api/order/get-all", { headers: { Authorization: `Bearer ${token}` }}),
+          axios.get("https://koi-care-at-home-server-h3fyedfeeecdg7fh.southeastasia-01.azurewebsites.net/api/account/all-users", { headers: { Authorization: `Bearer ${token}` }}),
+          axios.get("https://koi-care-at-home-server-h3fyedfeeecdg7fh.southeastasia-01.azurewebsites.net/api/product/get-all", { headers: { Authorization: `Bearer ${token}` }}),
+          axios.get("https://koi-care-at-home-server-h3fyedfeeecdg7fh.southeastasia-01.azurewebsites.net/api/blogs/get-all", { headers: { Authorization: `Bearer ${token}` }}),
+          axios.get("https://koi-care-at-home-server-h3fyedfeeecdg7fh.southeastasia-01.azurewebsites.net/api/order/get-all", { headers: { Authorization: `Bearer ${token}` }}),
         ]);
 
         if (usersRes?.data?.users) {

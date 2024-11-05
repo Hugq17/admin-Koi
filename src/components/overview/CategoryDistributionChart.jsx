@@ -18,7 +18,7 @@ const CategoryDistributionChart = () => {
   useEffect(() => {
     const fetchCategoryData = async () => {
       try {
-        const response = await axios.get('https://koi-care-server.azurewebsites.net/api/product/get-all'); // Thay thế URL bằng API của bạn
+        const response = await axios.get('https://koi-care-at-home-server-h3fyedfeeecdg7fh.southeastasia-01.azurewebsites.net/api/product/get-all'); // Thay thế URL bằng API của bạn
         const productData = response.data.products;
 
         // Tính tổng số sản phẩm cho mỗi danh mục

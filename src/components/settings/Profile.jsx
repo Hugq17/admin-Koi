@@ -1,8 +1,16 @@
 import React from "react";
 import SettingSection from "./SettingSection";
 import { User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
+  const navigate = useNavigate(); // Initialize the useNavigate hook
+
+  const handleLogout = () => {
+    localStorage.removeItem("authToken"); // Remove token from localStorage
+    navigate("/login"); // Redirect to the login page
+  };
+
   return (
     <SettingSection icon={User} title={"Hồ sơ"}>
       <div className="flex flex-col sm:flex-row items-center mb-6">
@@ -20,7 +28,10 @@ const Profile = () => {
         <button className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">
           Chỉnh sửa
         </button>
-        <button className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded ml-2">
+        <button
+          onClick={handleLogout} // Add onClick event for logout
+          className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded ml-2"
+        >
           Đăng xuất
         </button>
       </td>

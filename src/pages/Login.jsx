@@ -24,23 +24,23 @@ const Login = ({ updateStatus }) => {
 
   const handleLogin = async (event) => {
     event.preventDefault();
-
+  
     if (!email || !password) {
       setError("Please fill in all fields.");
       return;
     }
-
+  
     if (!isEmailValid(email)) {
       setError("Please enter a valid email address.");
       return;
     }
-
+  
     setLoading(true);
-    setError(""); // Đặt lại thông báo lỗi
-
+    setError(""); // Reset error message
+  
     try {
       const response = await fetch(
-        "https://koi-care-server.azurewebsites.net/api/account/login",
+        "https://koi-care-at-home-server-h3fyedfeeecdg7fh.southeastasia-01.azurewebsites.net/api/account/login",
         {
           method: "POST",
           headers: {
@@ -49,12 +49,14 @@ const Login = ({ updateStatus }) => {
           body: JSON.stringify({ email, password }),
         }
       );
-
+  
       const data = await response.json();
-
+  
       if (response.ok) {
-        updateStatus(data.accessToken); // Gọi updateStatus với accessToken
-        navigate("/"); // Chuyển đến trang dashboard
+        // Save accessToken to localStorage
+        localStorage.setItem("authToken", data.accessToken);
+        updateStatus(data.accessToken); // Call updateStatus with accessToken
+        navigate("/"); // Redirect to dashboard
       } else {
         setError(data.message || "Login failed. Please try again.");
       }
@@ -64,6 +66,7 @@ const Login = ({ updateStatus }) => {
       setLoading(false);
     }
   };
+  
 
   return (
     <div className="login-image">

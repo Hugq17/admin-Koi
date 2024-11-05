@@ -15,7 +15,7 @@ const OrdersPage = () => {
 
 	const fetchOrderStats = async () => {
 		try {
-			const response = await axios.get('https://koi-care-server.azurewebsites.net/api/order/get-all');
+			const response = await axios.get('https://koi-care-at-home-server-h3fyedfeeecdg7fh.southeastasia-01.azurewebsites.net/api/order/get-all');
 			const orders = response.data.orders;
 
 			const totalOrders = orders.length; // Tổng số giao dịch
