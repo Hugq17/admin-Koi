@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Search, Eye, ArrowUpAz, ArrowDownZa, ArrowUp01, ArrowDown10 } from "lucide-react";
 import axios from "axios";
+import OrderDetailPopup from "./OrderDetailPopup";
 
 const OrdersTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -13,6 +14,7 @@ const OrdersTable = () => {
     key: "orderCode", // Default sorting by 'Mã giao dịch'
     direction: "asc", // Default direction ascending
   });
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -70,6 +72,13 @@ const OrdersTable = () => {
     });
 
     setFilteredOrders(sortedOrders);
+  };
+
+  const handleViewDetails = (orderId) => {
+    setSelectedOrderId(orderId);
+  };
+  const handleClosePopup = () => {
+    setSelectedOrderId(null);
   };
 
   const indexOfLastOrder = currentPage * postsPerPage;
@@ -230,7 +239,9 @@ const OrdersTable = () => {
                       : "N/A"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                    <button className="text-indigo-400 hover:text-indigo-300 mr-2">
+                    <button
+                    onClick={() => handleViewDetails(order.id)}
+                    className="text-indigo-400 hover:text-indigo-300 mr-2">
                       <Eye size={18} />
                     </button>
                   </td>
@@ -260,8 +271,12 @@ const OrdersTable = () => {
           Kế tiếp
         </button>
       </div>
+    {selectedOrderId && (
+      <OrderDetailPopup orderId={selectedOrderId} onClose={handleClosePopup} />
+    )}
     </motion.div>
   );
 };
 
 export default OrdersTable;
+
