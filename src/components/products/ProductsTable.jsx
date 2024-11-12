@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Edit, Search, Trash2, Plus } from 'lucide-react';
+import { Edit, Search, Trash2, Plus, ArrowUpAz, ArrowDownZa, ArrowUp01, ArrowDown10 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import DeleteConfirmPopup from './DeleteConfirmPopup';
@@ -16,6 +16,10 @@ const ProductsTable = () => {
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [showCreatePopup, setShowCreatePopup] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [sortConfig, setSortConfig] = useState({
+    key: 'name', // Default sort by 'name'
+    direction: 'asc', // Default direction is ascending
+  });
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -24,7 +28,7 @@ const ProductsTable = () => {
         setProducts(response.data.products);
         setFilteredProducts(response.data.products);
       } catch (error) {
-        console.error("Error fetching products: ", error);
+        console.error('Error fetching products: ', error);
       }
     };
 
@@ -35,8 +39,9 @@ const ProductsTable = () => {
     const term = e.target.value.toLowerCase();
     setSearchTerm(term);
     const filtered = products.filter(
-      (product) => (product?.name?.toLowerCase() || "").includes(term) || 
-                    (product?.category?.toLowerCase() || "").includes(term)
+      (product) =>
+        (product?.name?.toLowerCase() || '').includes(term) ||
+        (product?.category?.toLowerCase() || '').includes(term)
     );
     setFilteredProducts(filtered);
     setCurrentPage(1);
@@ -54,7 +59,7 @@ const ProductsTable = () => {
       setFilteredProducts(filteredProducts.filter((p) => p.id !== selectedProduct.id));
       setShowDeletePopup(false);
     } catch (error) {
-      console.error("Error deleting product: ", error);
+      console.error('Error deleting product: ', error);
     }
   };
 
@@ -70,7 +75,7 @@ const ProductsTable = () => {
       setFilteredProducts(filteredProducts.map((p) => (p.id === updatedProduct.id ? updatedProduct : p)));
       setShowEditPopup(false);
     } catch (error) {
-      console.error("Error updating product: ", error);
+      console.error('Error updating product: ', error);
     }
   };
 
@@ -85,8 +90,33 @@ const ProductsTable = () => {
       setFilteredProducts([response.data, ...filteredProducts]);
       setShowCreatePopup(false);
     } catch (error) {
-      console.error("Error creating product: ", error);
+      console.error('Error creating product: ', error);
     }
+  };
+
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+
+    const sortedProducts = [...filteredProducts].sort((a, b) => {
+      if (key === 'price') {
+        // Handle price sorting (numeric values)
+        return direction === 'asc' ? a[key] - b[key] : b[key] - a[key];
+      }
+
+      // Default sorting for string-based keys (name, category)
+      if (a[key] < b[key]) {
+        return direction === 'asc' ? -1 : 1;
+      }
+      if (a[key] > b[key]) {
+        return direction === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+    setFilteredProducts(sortedProducts);
   };
 
   const indexOfLastProduct = currentPage * postsPerPage;
@@ -119,24 +149,76 @@ const ProductsTable = () => {
         <table className='min-w-full divide-y divide-gray-700'>
           <thead>
             <tr>
-              <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap'>Tên</th>
-              <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap'>Danh mục</th>
-              <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap'>Giá bán</th>
-              <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap'>Mô tả sản phẩm</th>
-              <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap'>Thao tác</th>
+              <th
+                className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap cursor-pointer'
+                onClick={() => handleSort('name')}
+              >
+                Tên
+                {sortConfig.key === 'name' && (
+                  <span className='ml-2'>
+                    {sortConfig.direction === 'asc' ? (
+                      <ArrowUpAz size={16} />
+                    ) : (
+                      <ArrowDownZa size={16} />
+                    )}
+                  </span>
+                )}
+              </th>
+              <th
+                className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap cursor-pointer'
+                onClick={() => handleSort('category')}
+              >
+                Danh mục
+                {sortConfig.key === 'category' && (
+                  <span className='ml-2'>
+                    {sortConfig.direction === 'asc' ? (
+                      <ArrowUpAz size={16} />
+                    ) : (
+                      <ArrowDownZa size={16} />
+                    )}
+                  </span>
+                )}
+              </th>
+              <th
+                className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap cursor-pointer'
+                onClick={() => handleSort('price')}
+              >
+                Giá bán
+                {sortConfig.key === 'price' && (
+                  <span className='ml-2'>
+                    {sortConfig.direction === 'asc' ? (
+                      <ArrowUp01 size={16} />
+                    ) : (
+                      <ArrowDown10 size={16} />
+                    )}
+                  </span>
+                )}
+              </th>
+              <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap'>
+                Mô tả sản phẩm
+              </th>
+              <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap'>
+                Thao tác
+              </th>
             </tr>
           </thead>
-          
+
           <tbody className='divide-y divide-gray-700'>
             {currentProducts.map((product) => (
               <tr key={product.id}>
                 <td className='px-6 py-4 text-sm font-medium text-gray-100'>{product.name}</td>
                 <td className='px-6 py-4 text-sm text-gray-300'>{product.category}</td>
-                <td className='px-6 py-4 text-sm text-gray-300'>{product.price?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
+                <td className='px-6 py-4 text-sm text-gray-300'>
+                  {product.price?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                </td>
                 <td className='px-6 py-4 text-sm text-gray-300'>{product.description}</td>
                 <td className='px-6 py-4 text-sm text-gray-300'>
-                  <button className='text-indigo-400 hover:text-indigo-300 mr-2' onClick={() => handleEdit(product)}><Edit size={18} /></button>
-                  <button className='text-red-400 hover:text-red-300' onClick={() => handleDelete(product)}><Trash2 size={18} /></button>
+                  <button className='text-indigo-400 hover:text-indigo-300 mr-2' onClick={() => handleEdit(product)}>
+                    <Edit size={18} />
+                  </button>
+                  <button className='text-red-400 hover:text-red-300' onClick={() => handleDelete(product)}>
+                    <Trash2 size={18} />
+                  </button>
                 </td>
               </tr>
             ))}
@@ -149,9 +231,15 @@ const ProductsTable = () => {
       {showCreatePopup && <CreateProductPopup onClose={() => setShowCreatePopup(false)} onSave={saveCreate} />}
 
       <div className='flex justify-between items-center mt-4'>
-        <button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1} className='text-gray-400 hover:text-gray-300'>Trước</button>
-        <span className='text-gray-100'>Trang {currentPage} / {totalPages}</span>
-        <button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages} className='text-gray-400 hover:text-gray-300'>Kế tiếp</button>
+        <button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1} className='text-gray-400 hover:text-gray-300'>
+          Trước
+        </button>
+        <span className='text-gray-100'>
+          Trang {currentPage} / {totalPages}
+        </span>
+        <button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages} className='text-gray-400 hover:text-gray-300'>
+          Kế tiếp
+        </button>
       </div>
     </motion.div>
   );

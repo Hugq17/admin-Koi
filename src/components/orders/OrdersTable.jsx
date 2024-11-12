@@ -1,23 +1,28 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, Eye } from "lucide-react";
+import { Search, Eye, ArrowUpAz, ArrowDownZa, ArrowUp01, ArrowDown10 } from "lucide-react";
 import axios from "axios";
 
 const OrdersTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [postsPerPage] = useState(5);
+  const [sortConfig, setSortConfig] = useState({
+    key: "orderCode", // Default sorting by 'Mã giao dịch'
+    direction: "asc", // Default direction ascending
+  });
 
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        // Set up headers with the authentication token
-        const token = localStorage.getItem("authToken"); // Ensure the token is saved in localStorage
+        const token = localStorage.getItem("authToken");
         const response = await axios.get(
           "https://koi-care-at-home-server-h3fyedfeeecdg7fh.southeastasia-01.azurewebsites.net/api/order/get-all",
           {
             headers: {
-              Authorization: `Bearer ${token}`, // Include token in the headers
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -36,11 +41,43 @@ const OrdersTable = () => {
     setSearchTerm(term);
     const filtered = orders.filter(
       (order) =>
-        order.id.toString().includes(term) ||
+        order.orderCode.toString().includes(term) ||
         order.customerName.toLowerCase().includes(term)
     );
     setFilteredOrders(filtered);
+    setCurrentPage(1);
   };
+
+  const handleSort = (key) => {
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+
+    const sortedOrders = [...filteredOrders].sort((a, b) => {
+      if (key === "orderDate" || key === "completedAt") {
+        return direction === "asc"
+          ? new Date(a[key]) - new Date(b[key])
+          : new Date(b[key]) - new Date(a[key]);
+      }
+      if (key === "total") {
+        return direction === "asc" ? a[key] - b[key] : b[key] - a[key];
+      }
+      if (a[key] < b[key]) return direction === "asc" ? -1 : 1;
+      if (a[key] > b[key]) return direction === "asc" ? 1 : -1;
+      return 0;
+    });
+
+    setFilteredOrders(sortedOrders);
+  };
+
+  const indexOfLastOrder = currentPage * postsPerPage;
+  const indexOfFirstOrder = indexOfLastOrder - postsPerPage;
+  const currentOrders = filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const totalPages = Math.ceil(filteredOrders.length / postsPerPage);
 
   return (
     <motion.div
@@ -50,9 +87,7 @@ const OrdersTable = () => {
       transition={{ delay: 0.4 }}
     >
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-gray-100">
-          Danh sách giao dịch
-        </h2>
+        <h2 className="text-xl font-semibold text-gray-100">Danh sách giao dịch</h2>
         <div className="relative">
           <input
             type="text"
@@ -69,23 +104,71 @@ const OrdersTable = () => {
         <table className="min-w-full divide-y divide-gray-700">
           <thead>
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+              <th
+                className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer"
+                onClick={() => handleSort("orderCode")}
+              >
                 Mã giao dịch
+                {sortConfig.key === "orderCode" && (
+                  <span className="ml-2">
+                    {sortConfig.direction === "asc" ? <ArrowUpAz size={16} /> : <ArrowDownZa size={16} />}
+                  </span>
+                )}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+              <th
+                className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer"
+                onClick={() => handleSort("customerName")}
+              >
                 Tên khách hàng
+                {sortConfig.key === "customerName" && (
+                  <span className="ml-2">
+                    {sortConfig.direction === "asc" ? <ArrowUpAz size={16} /> : <ArrowDownZa size={16} />}
+                  </span>
+                )}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+              <th
+                className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer"
+                onClick={() => handleSort("total")}
+              >
                 Tổng tiền
+                {sortConfig.key === "total" && (
+                  <span className="ml-2">
+                    {sortConfig.direction === "asc" ? <ArrowUp01 size={16} /> : <ArrowDown10 size={16} />}
+                  </span>
+                )}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+              <th
+                className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer"
+                onClick={() => handleSort("isCompleted")}
+              >
                 Trạng thái
+                {sortConfig.key === "isCompleted" && (
+                  <span className="ml-2">
+                    {sortConfig.direction === "asc" ? <ArrowUpAz size={16} /> : <ArrowDownZa size={16} />}
+                  </span>
+                )}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+              <th
+                className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer"
+                onClick={() => handleSort("orderDate")}
+              >
                 Ngày mua
+                {sortConfig.key === "orderDate" && (
+                  <span className="ml-2">
+                    {sortConfig.direction === "asc" ? <ArrowUp01 size={16} /> : <ArrowDown10 size={16} />}
+                  </span>
+                )}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+              <th
+                className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer"
+                onClick={() => handleSort("completedAt")}
+              >
                 Ngày giao
+                {sortConfig.key === "completedAt" && (
+                  <span className="ml-2">
+                    {sortConfig.direction === "asc" ? <ArrowUp01 size={16} /> : <ArrowDown10 size={16} />}
+                  </span>
+                )}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                 Thao tác
@@ -104,19 +187,15 @@ const OrdersTable = () => {
                 </td>
               </tr>
             ) : (
-              filteredOrders.map((order) => (
+              currentOrders.map((order) => (
                 <motion.tr
-                  key={order.id}
+                  key={order.orderCode}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100">
-                    {order.id}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100">
-                    {order.customerName}
-                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100">{order.orderCode}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100">{order.customerName}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100">
                     {order.total.toLocaleString("vi-VN", {
                       style: "currency",
@@ -160,6 +239,26 @@ const OrdersTable = () => {
             )}
           </tbody>
         </table>
+      </div>
+
+      <div className="flex justify-between items-center mt-4">
+        <button
+          className="text-gray-400 hover:text-gray-300 disabled:opacity-50"
+          onClick={() => paginate(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          Trước
+        </button>
+        <span className="text-gray-100">
+          Trang {currentPage} / {totalPages}
+        </span>
+        <button
+          className="text-gray-400 hover:text-gray-300 disabled:opacity-50"
+          onClick={() => paginate(currentPage + 1)}
+          disabled={currentPage === totalPages}
+        >
+          Kế tiếp
+        </button>
       </div>
     </motion.div>
   );

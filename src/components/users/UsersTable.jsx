@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search } from "lucide-react";
+import { Search, ArrowUpAz, ArrowDownZa } from "lucide-react";
 import axios from "axios";
 import ViewUserPopup from "./ViewUserPopup";
 
@@ -11,6 +11,12 @@ const UsersTable = () => {
 	const [currentPage, setCurrentPage] = useState(1);
 	const [selectedUser, setSelectedUser] = useState(null); // For popup
 	const [postsPerPage] = useState(5);
+
+	// Sort state
+	const [sortConfig, setSortConfig] = useState({
+		key: "username", // default sort by "Tên"
+		direction: "asc", // default ascending
+	});
 
 	// Fetch users
 	useEffect(() => {
@@ -43,6 +49,26 @@ const UsersTable = () => {
 		);
 		setFilteredUsers(filtered);
 		setCurrentPage(1);
+	};
+
+	// Sort functionality
+	const handleSort = (key) => {
+		let direction = "asc";
+		if (sortConfig.key === key && sortConfig.direction === "asc") {
+			direction = "desc";
+		}
+		setSortConfig({ key, direction });
+
+		const sortedUsers = [...filteredUsers].sort((a, b) => {
+			if (a[key] < b[key]) {
+				return direction === "asc" ? -1 : 1;
+			}
+			if (a[key] > b[key]) {
+				return direction === "asc" ? 1 : -1;
+			}
+			return 0;
+		});
+		setFilteredUsers(sortedUsers);
 	};
 
 	// Pagination calculations
@@ -113,11 +139,69 @@ const UsersTable = () => {
 					<table className='min-w-full divide-y divide-gray-700'>
 						<thead>
 							<tr>
-								<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>Tên</th>
-								<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>Email</th>
-								<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>Vai trò</th>
-								<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>Trạng thái</th>
-								<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>Thao tác</th>
+								<th
+									className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer'
+									onClick={() => handleSort("username")}
+								>
+									Tên
+									{sortConfig.key === "username" && (
+										<span className='ml-2'>
+											{sortConfig.direction === "asc" ? (
+												<ArrowUpAz size={16} />
+											) : (
+												<ArrowDownZa size={16} />
+											)}
+										</span>
+									)}
+								</th>
+								<th
+									className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer'
+									onClick={() => handleSort("email")}
+								>
+									Email
+									{sortConfig.key === "email" && (
+										<span className='ml-2'>
+											{sortConfig.direction === "asc" ? (
+												<ArrowUpAz size={16} />
+											) : (
+												<ArrowDownZa size={16} />
+											)}
+										</span>
+									)}
+								</th>
+								<th
+									className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer'
+									onClick={() => handleSort("roleName")}
+								>
+									Vai trò
+									{sortConfig.key === "roleName" && (
+										<span className='ml-2'>
+											{sortConfig.direction === "asc" ? (
+												<ArrowUpAz size={16} />
+											) : (
+												<ArrowDownZa size={16} />
+											)}
+										</span>
+									)}
+								</th>
+								<th
+									className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer'
+									onClick={() => handleSort("isActive")}
+								>
+									Trạng thái
+									{sortConfig.key === "isActive" && (
+										<span className='ml-2'>
+											{sortConfig.direction === "asc" ? (
+												<ArrowUpAz size={16} />
+											) : (
+												<ArrowDownZa size={16} />
+											)}
+										</span>
+									)}
+								</th>
+								<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
+									Thao tác
+								</th>
 							</tr>
 						</thead>
 						<tbody className='divide-y divide-gray-700'>
@@ -161,7 +245,7 @@ const UsersTable = () => {
 											Xem
 										</button>
 										<button
-											className='text-red-400 hover:text-red-300'
+											className={`text-red-400 hover:text-red-300`}
 											onClick={() => handleBlockUnblock(user.id, user.isActive)}
 										>
 											{user.isActive ? "Chặn" : "Bỏ chặn"}
@@ -172,9 +256,8 @@ const UsersTable = () => {
 						</tbody>
 					</table>
 				</div>
-
-				{/* Kiểm soát phân trang */}
-				<div className='flex justify-between items-center mt-4'>
+					{/* Kiểm soát phân trang */}
+					<div className='flex justify-between items-center mt-4'>
 					<button
 						className='text-gray-400 hover:text-gray-300 disabled:opacity-50'
 						onClick={() => paginate(currentPage - 1)}
@@ -194,13 +277,11 @@ const UsersTable = () => {
 					</button>
 				</div>
 			</motion.div>
+			
 
-			{/* Popup xem chi tiết người dùng */}
+			{/* View User Popup */}
 			{selectedUser && (
-				<ViewUserPopup
-					user={selectedUser}
-					onClose={() => setSelectedUser(null)}
-				/>
+				<ViewUserPopup user={selectedUser} onClose={() => setSelectedUser(null)} />
 			)}
 		</>
 	);
