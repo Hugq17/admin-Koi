@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import logo from "../assets/brand/logo.png";
+import KoiBG from "../assets/brand/KoiBG.jpg";
 const Login = ({ updateStatus }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,27 +18,26 @@ const Login = ({ updateStatus }) => {
   };
 
   const isEmailValid = (email) => {
-    // Kiểm tra định dạng email đơn giản
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
   };
 
   const handleLogin = async (event) => {
     event.preventDefault();
-  
+
     if (!email || !password) {
-      setError("Please fill in all fields.");
+      setError("Vui lòng điền đầy đủ thông tin.");
       return;
     }
-  
+
     if (!isEmailValid(email)) {
-      setError("Please enter a valid email address.");
+      setError("Vui lòng nhập địa chỉ email hợp lệ.");
       return;
     }
-  
+
     setLoading(true);
-    setError(""); // Reset error message
-  
+    setError("");
+
     try {
       const response = await fetch(
         "https://koi-care-at-home-server-h3fyedfeeecdg7fh.southeastasia-01.azurewebsites.net/api/account/login",
@@ -49,14 +49,13 @@ const Login = ({ updateStatus }) => {
           body: JSON.stringify({ email, password }),
         }
       );
-  
+
       const data = await response.json();
-  
+
       if (response.ok) {
-        // Save accessToken to localStorage
         localStorage.setItem("authToken", data.accessToken);
-        updateStatus(data.accessToken); // Call updateStatus with accessToken
-        navigate("/"); // Redirect to dashboard
+        updateStatus(data.accessToken);
+        navigate("/");
       } else {
         setError(data.message || "Login failed. Please try again.");
       }
@@ -66,52 +65,84 @@ const Login = ({ updateStatus }) => {
       setLoading(false);
     }
   };
-  
 
   return (
-    <div className="login-image">
-      <div className="flex items-center p-40 w-full">
-        <form
-          onSubmit={handleLogin}
-          className="flex flex-col items-center w-full"
-        >
-          <p className="text-6xl pixelify-sans text-white w-screen flex justify-center">
-            Đăng nhập
-          </p>
-          <div className="mt-10 w-full flex justify-center">
+    <div
+      className="bg-black bg-opacity-80 flex justify-center items-center min-h-screen"
+      style={{ backgroundColor: "#111827" }}
+    >
+      {/* Left: Background Image */}
+      <div className="w-1/2 hidden lg:block">
+        <img
+          src={KoiBG}
+          alt="Background"
+          className="object-cover w-full h-screen filter brightness-50"
+        />
+      </div>
+
+      {/* Right: Login Form */}
+      <div className="lg:p-36 md:p-52 p-8 w-full lg:w-1/2 bg-gray-800 shadow-lg rounded-lg"
+        style={{ backgroundColor: "#111827" }}>
+        <div className="flex justify-center mb-4">
+          <img
+            src={logo}
+            className="h-32 w-auto my-2"
+            alt="Logo"
+            style={{ width: "auto", height: "180px" }}
+          />
+        </div>
+        <h1 className="text-3xl font-semibold text-white mb-6 text-center">
+          Đăng nhập
+        </h1>
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div>
+            <label htmlFor="email" className="block text-white mb-1">
+              Email
+            </label>
             <input
+              type="email"
+              id="email"
               value={email}
-              placeholder="Email"
               onChange={handleInputChangeEmail}
-              className="bg-[#F1F1F1] p-3 rounded-md text-black w-1/2" // Thay đổi độ rộng
-              aria-label="Email"
+              placeholder="Nhập email của bạn"
+              className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
               disabled={loading}
-              type="email" // Thay đổi thành type="email"
+              style={{ color: "black" }}
             />
           </div>
-          <div className="mt-1 mb-8 w-full flex justify-center">
+          <div>
+            <label htmlFor="password" className="block text-white mb-1">
+              Mật khẩu
+            </label>
             <input
-              placeholder="Mật khẩu"
-              value={password}
               type="password"
+              id="password"
+              value={password}
               onChange={handleInputChangePassword}
-              className="bg-[#F1F1F1] p-3 rounded-md text-black w-1/2" // Thay đổi độ rộng
-              aria-label="Password"
+              placeholder="Nhập mật khẩu của bạn"
+              className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
               disabled={loading}
+              style={{ color: "black" }}
             />
           </div>
-          {error && <p className="text-red-500 mb-4">{error}</p>}
+          {error && <p className="text-red-500 text-center">{error}</p>}
           <button
             type="submit"
-            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded w-max"
+            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-md py-2 px-4 w-full transition duration-200"
             disabled={loading}
           >
             {loading ? "Đang đăng nhập..." : "Đăng nhập"}
           </button>
         </form>
+
+        {/* Forgot Password & Sign Up Links */}
+        <div className="flex justify-between mt-4 text-sm text-blue-500">
+          <a href="#" className="hover:underline">Quên mật khẩu?</a>
+        </div>
       </div>
     </div>
   );
 };
 
 export default Login;
+
